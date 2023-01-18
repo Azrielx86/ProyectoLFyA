@@ -181,8 +181,6 @@ def curses_animation(menu: CursesMenu, from_f: int, to_f: int):
     stdscr = curses.initscr()
     curses.start_color()
     curses.use_default_colors()
-    curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
-    curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
     stdscr.border(0)
     stdscr.refresh()
 
@@ -200,7 +198,7 @@ def curses_animation(menu: CursesMenu, from_f: int, to_f: int):
         floor_pad.refresh(0, 0, 5, 16, 15, 25)
 
         for fi, f in enumerate(floor):
-            floor_pad.addstr(fi, 0, f, curses.color_pair(2))
+            floor_pad.addstr(fi, 0, f)
         floor_pad.refresh(0, 0, 5, 16, 15, 25)
 
         for i in range(len(arr_dir)):
@@ -208,7 +206,7 @@ def curses_animation(menu: CursesMenu, from_f: int, to_f: int):
             arrow_pad.refresh(i if from_f < to_f else 5 - i, 0, 5, 5, 16, 15)
 
             for j, w in enumerate(arr_dir):
-                arrow_pad.addstr(j, 0, w, curses.color_pair(2))
+                arrow_pad.addstr(j, 0, w)
 
             arrow_pad.refresh(i if from_f < to_f else 5 - i, 0, 5, 5, 16, 15)
             sleep(0.05)
