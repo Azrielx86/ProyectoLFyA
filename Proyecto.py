@@ -1,3 +1,4 @@
+import re
 import curses
 from sys import argv
 from os import get_terminal_size
@@ -7,42 +8,28 @@ from cursesmenu import *
 from cursesmenu.items import *
 from argparse import ArgumentParser
 from art import text2art
-from curses import *
+from curses import panel
 
 ARROW_UP = [
-    "     .",
-    "   .:;:.",
-    " .:;;;;;:.",
-    "   ;;;;;",
-    "   ;;;;;",
-    "   ;;;;;",
-    "   ;;;;;",
-    "   ;:;;;",
-    "   : ;;;",
-    "     ;:;",
-    "   . :.;",
-    "     . :",
-    "   .   .",
-    "",
-    "      .",
+    "     .     ",
+    "   .:;:.   ",
+    " .:;;;;;:. ",
+    "   ;;;;;   ",
+    "   ;;;;;   ",
+    "   ;;;;;   ",
+    "   ;;;;;   ",
+    "   ;;;;;   ",
 ]
 
 ARROW_DOWN = [
-    "     .",
-    "       .",
-    "   . ;.",
-    "    .;",
-    "     ;;.",
-    "   ;.;;",
-    "   ;;;;.",
-    "   ;;;;;",
-    "   ;;;;;",
-    "   ;;;;;",
-    "   ;;;;;",
-    "   ;;;;;",
-    " ..;;;;;..",
-    "  ':::::'",
-    "    ':`",
+    "   ;;;;;   ",
+    "   ;;;;;   ",
+    "   ;;;;;   ",
+    "   ;;;;;   ",
+    "   ;;;;;   ",
+    " ..;;;;;.. ",
+    "  ':::::'  ",
+    "    ':`    ",
 ]
 
 
@@ -57,7 +44,7 @@ class State:
         self.__name: str = name
         self.__is_start: bool = is_start
         self.__is_final: bool = is_final
-        self.__transitions: Dict[str, "State"] = {}
+        self.__transitions: Dict[Literal["0", "1"], "State"] = {}
 
     @property
     def name(self) -> str:
@@ -191,16 +178,50 @@ class Elevator:
             print(f"Error al bajar: {e}")
 
 
-def curses_animation(from_f: int, to_f: int):
+def curses_animation(menu: CursesMenu, from_f: int, to_f: int):
+    menu.pause()
     stdscr = curses.initscr()
-    sleep(2)
-    curses.endwin()
-    pass
+    curses.start_color()
+    curses.use_default_colors()
+    curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
+    curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
+    stdscr.border(0)
+    stdscr.refresh()
+
+    arrow_pad = curses.newpad(11, 9)
+    floor_pad = curses.newpad(20, 20)
+    stdscr.refresh()
+
+    arr_dir = ARROW_DOWN if from_f > to_f else ARROW_UP
+
+    count = from_f - to_f if from_f > to_f else to_f - from_f
+
+    for steps in range(count + 1):
+        floor = re.split("\n", text2art(str(steps + from_f if from_f < to_f else from_f - steps)))
+        floor_pad.clear()
+        floor_pad.refresh(0, 0, 5, 16, 15, 25)
+
+        for fi, f in enumerate(floor):
+            floor_pad.addstr(fi, 0, f, curses.color_pair(2))
+        floor_pad.refresh(0, 0, 5, 16, 15, 25)
+
+        for i in range(len(arr_dir)):
+            arrow_pad.clear()
+            arrow_pad.refresh(i if from_f < to_f else 5 - i, 0, 5, 5, 16, 15)
+
+            for j, w in enumerate(arr_dir):
+                arrow_pad.addstr(j, 0, w, curses.color_pair(2))
+
+            arrow_pad.refresh(i if from_f < to_f else 5 - i, 0, 5, 5, 16, 15)
+            sleep(0.1)
+
+    stdscr.clear()
+    curses.curs_set(0)
+    stdscr.refresh()
+    menu.resume()
 
 
 def goto_floor(elevator: Elevator, floor: int, menu: CursesMenu):
-    menu.pause()
-
     from_f = elevator.current_floor
     to_f = floor
 
@@ -214,7 +235,7 @@ def goto_floor(elevator: Elevator, floor: int, menu: CursesMenu):
     menu.title = f"Elevador - Piso actual: \
             {elevator.current_floor if elevator.current_floor != 0 else 'Planta baja'}"
 
-    curses_animation(from_f, to_f)
+    curses_animation(menu, from_f, to_f)
 
 
 if __name__ == "__main__":
@@ -237,5 +258,4 @@ if __name__ == "__main__":
         )
         menu.items.append(item)
 
-    menu.start()
-    menu.join()
+    menu.show()
