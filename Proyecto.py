@@ -249,13 +249,13 @@ if __name__ == "__main__":
     print(" Proyecto Lenguajes Formales y Autómatas ".center(get_terminal_size().columns, "="))
 
     menu = CursesMenu("Elevador - Piso actual: Planta baja")
-    menu.items.append(
-        FunctionItem(text="Planta baja", function=goto_floor, args=[elevator, 0, menu], menu=menu, override_index=0)
-    )
-    for i in range(1, elevator.floors):
+    for i in range(elevator.floors, 0, -1):
         item = FunctionItem(
             text=f"Piso {i}", function=goto_floor, args=[elevator, i, menu], menu=menu, override_index=i
         )
         menu.items.append(item)
+    menu.items.append(
+        FunctionItem(text="Planta baja", function=goto_floor, args=[elevator, 0, menu], menu=menu, override_index=0)
+    )
 
     menu.show()
