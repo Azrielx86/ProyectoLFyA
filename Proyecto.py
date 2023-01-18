@@ -1,6 +1,5 @@
 import re
 import curses
-from sys import argv
 from os import get_terminal_size
 from time import sleep
 from typing import Literal, Dict
@@ -8,7 +7,6 @@ from cursesmenu import *
 from cursesmenu.items import *
 from argparse import ArgumentParser
 from art import text2art
-from curses import panel
 
 ARROW_UP = [
     "     .     ",
@@ -213,7 +211,7 @@ def curses_animation(menu: CursesMenu, from_f: int, to_f: int):
                 arrow_pad.addstr(j, 0, w, curses.color_pair(2))
 
             arrow_pad.refresh(i if from_f < to_f else 5 - i, 0, 5, 5, 16, 15)
-            sleep(0.1)
+            sleep(0.05)
 
     stdscr.clear()
     curses.curs_set(0)
@@ -232,8 +230,7 @@ def goto_floor(elevator: Elevator, floor: int, menu: CursesMenu):
     else:
         pass
 
-    menu.title = f"Elevador - Piso actual: \
-            {elevator.current_floor if elevator.current_floor != 0 else 'Planta baja'}"
+    menu.title = f"Elevador - Piso actual: {elevator.current_floor if elevator.current_floor != 0 else 'Planta baja'}"
 
     curses_animation(menu, from_f, to_f)
 
