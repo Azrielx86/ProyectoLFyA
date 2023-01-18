@@ -15,4 +15,6 @@ o
 
     python .\Proyecto.py --pisos <Número de pisos>
 
----
+## Demostración
+
+![Demostracion](./docs/elevador.gif)
